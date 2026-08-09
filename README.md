@@ -1,3 +1,3 @@
 # rust-benchmark
 
-C benchmark program showcasing C performance compared to idiomatic Rust.
+C benchmark program showcasing (fully optimized) C performance compared to idiomatic Rust.
