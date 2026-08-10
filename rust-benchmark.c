@@ -1,8 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #define ARRAY_SIZE 1000000000 // 1 billion elements
+
+// Atomic flag to control the spinner loop
+volatile int keep_spinning = 1;
+
+// ---------------------------------------------------------
+// Spinner Thread Function
+// ---------------------------------------------------------
+void *spinner_thread(void *arg) {
+    const char spinner[] = "|/-\\";
+    int i = 0;
+    
+    while (keep_spinning) {
+        // Print current character and backspace the cursor
+        printf("%c\b", spinner[i++ % 4]);
+        fflush(stdout);
+        usleep(100000); // 100ms delay
+    }
+    
+    // Clear the spinner character when stopping
+    printf(" \b");
+    return NULL;
+}
 
 // ---------------------------------------------------------
 // 1. Standard C Implementation
@@ -18,7 +42,6 @@ long long sum_c(const long long *arr, size_t size) {
 // ---------------------------------------------------------
 // 2. Rust Implementation (via FFI)
 // ---------------------------------------------------------
-// We tell the C compiler that this function exists somewhere else (in our Rust lib)
 extern long long sum_rust(const long long *arr, size_t size);
 
 // ---------------------------------------------------------
@@ -44,7 +67,13 @@ int main() {
     long long result_c, result_rust;
     double time_c, time_rust;
 
-    printf("Running benchmarks...\n\n");
+    // Modified to keep the cursor on the same line for the spinner
+    printf("Running benchmarks... ");
+    fflush(stdout);
+
+    // Start the spinner in a background thread
+    pthread_t spinner;
+    pthread_create(&spinner, NULL, spinner_thread, NULL);
 
     // --- Benchmark C Version ---
     clock_gettime(CLOCK_MONOTONIC, &start);
@@ -52,7 +81,6 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &end);
     
     time_c = get_time_diff(start, end);
-    printf("[C Version]    Result: %lld | Time: %.6f seconds\n", result_c, time_c);
 
     // --- Benchmark Rust Version ---
     clock_gettime(CLOCK_MONOTONIC, &start);
@@ -60,6 +88,13 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &end);
     
     time_rust = get_time_diff(start, end);
+
+    // Stop the spinner thread
+    keep_spinning = 0;
+    pthread_join(spinner, NULL);
+    printf("\n\n"); // Print the newlines after the spinner finishes
+
+    printf("[C Version]    Result: %lld | Time: %.6f seconds\n", result_c, time_c);
     printf("[Rust Version] Result: %lld | Time: %.6f seconds\n", result_rust, time_rust);
 
     // --- Comparison ---
