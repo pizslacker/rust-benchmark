@@ -30,4 +30,4 @@ Difference: Rust was 1.87% faster than C.
 
 ![WUT!?](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDdid2pnZndrMGdxZHNydXk3amdscmEyYjRxZGRvN2tmbmNsYXJqZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YVPwi7L2izTJS/giphy.gif)
 
-These results were also quite inconsistant.
+These results were also quite inconsistant. If these are reproducible, I can see why Torvalds considers Rust "stable" by now.
